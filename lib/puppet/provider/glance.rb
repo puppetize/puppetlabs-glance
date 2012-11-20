@@ -61,7 +61,7 @@ class Puppet::Provider::Glance < Puppet::Provider
   def self.auth_glance(*args)
     begin
       g = glance_credentials
-      glance('-T', g['admin_tenant_name'], '-I', g['admin_user'], '-K', g['admin_password'], '-N', auth_endpoint, args)
+      glance('-T', g['admin_tenant_name'], '-I', g['admin_user'], '-K', g['admin_password'], '-N', auth_endpoint, *args.flatten)
     rescue Exception => e
       # Will probably add conditions later
       raise(e)
@@ -112,7 +112,8 @@ class Puppet::Provider::Glance < Puppet::Provider
     def self.get_glance_image_attrs(id)
       attrs = {}
       (auth_glance('show', id).split("\n") || []).collect do |line|
-        attrs[line.split(': ').first.downcase] = line.split(': ')[1..-1].to_s
+        key, value = line.split(': ', 2)
+        attrs[key.downcase] = value
       end
       return attrs
     end
